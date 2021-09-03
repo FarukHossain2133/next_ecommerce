@@ -7,6 +7,9 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Link from 'next/link';
+import { parseCookies } from 'nookies';
+import cookie from 'js-cookie';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -22,6 +25,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ButtonAppBar() {
     const classes = useStyles();
+    const cookies = parseCookies();
+    const router = useRouter();
+
+    const user = cookies.user ? JSON.parse(cookies.user) : "";
 
     return (
         <div className={classes.root}>
@@ -36,26 +43,52 @@ export default function ButtonAppBar() {
                         </Link>
                     </Typography>
                     <div style={{ marginLeft: "auto" }}>
-                        <Button color="inherit">
-                            <Link href="/profile">
-                                Profile
-                            </Link>
-                        </Button>
-                        <Button color="inherit">
-                            <Link href="/login">
-                                Login
-                            </Link>
-                        </Button>
-                        <Button color="inherit">
-                            <Link href="/signup">
-                                Signup
-                            </Link>
-                        </Button>
+
+
                         <Button color="inherit">
                             <Link href="/cart">
                                 Cart
                             </Link>
                         </Button>
+
+                        {user && user.role !== "user" &&
+                            <Button color="inherit">
+                                <Link href="/create">
+                                    Create
+                                </Link>
+                            </Button>
+                        }
+                        {user ?
+                            <>
+                                <Button color="inherit">
+                                    <Link href="/account">
+                                        Account
+                                    </Link>
+                                </Button>
+                                <Button color="inherit" onClick={() => {
+                                    cookie.remove("token");
+                                    cookie.remove("user");
+                                    router.push("/login")
+                                }}>
+                                    Logout
+                                </Button>
+                            </>
+                            :
+                            <>
+                                <Button color="inherit">
+                                    <Link href="/login">
+                                        Login
+                                    </Link>
+                                </Button>
+                                <Button color="inherit">
+                                    <Link href="/signup">
+                                        Signup
+                                    </Link>
+                                </Button>
+                            </>
+                        }
+
+
                     </div>
                 </Toolbar>
             </AppBar>

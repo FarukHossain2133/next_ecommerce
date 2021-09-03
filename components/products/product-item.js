@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -12,6 +12,9 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from 'components/material/Dialog';
 import baseUrl from 'helpers/baseUrl';
 import { useRouter } from 'next/router';
+import { parseCookies } from 'nookies';
+import Toaster from 'components/ui/Tostify';
+import cookie2 from 'js-cookie';
 
 const useStyles = makeStyles({
     root: {
@@ -23,7 +26,12 @@ const useStyles = makeStyles({
 });
 
 export default function MediaCard({ product, single }) {
+    const [quantity, setQuantity] = useState(1);
+
     const router = useRouter();
+    const cookie = parseCookies();
+    const user = cookie.user ? JSON.parse(cookie.user) : "";
+
     const { mediaUrl, name, description, price, _id } = product;
     const classes = useStyles();
 
@@ -36,6 +44,39 @@ export default function MediaCard({ product, single }) {
         const data = await response.json();
         router.push("/")
 
+    }
+
+
+    const addToCart = async () => {
+      const res = await fetch("/api/cart", {
+            method: "PUT",
+            body: JSON.stringify({quantity, productId: _id}),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${cookie.token}`
+            }
+        });
+
+        const res2 = await res.json();
+        if(res2.error){
+            Toaster({
+                message: res2.error,
+                type: 'error',
+            })
+
+            cookie2.remove("token");
+            cookie2.remove("user");
+            router2.push("/login")
+        }else {
+            Toaster({
+                message: res2.message,
+                type: 'success',
+            })
+
+            router.push("/")
+        }
+
+        console.log(res2);
     }
 
     return (
@@ -65,6 +106,7 @@ export default function MediaCard({ product, single }) {
             </CardActionArea>
             <CardActions style={{ display: "flex", justifyContent: 'space-between' }}>
                 {single ?
+
                     <span>
                         <TextField
                             // id="outlined-basic"
@@ -72,10 +114,20 @@ export default function MediaCard({ product, single }) {
                             variant="outlined"
                             size="small"
                             type="number"
+                            value={quantity}
+                            onChange={(e)=>setQuantity(Number(e.target.value))}
                         />
-                        <Button size="small" color="primary" variant="contained" size="medium">
-                            + ADD
+                        {user ?
+                            <Button size="small" color="primary" variant="contained" size="medium"
+                                onClick={()=>addToCart()}
+                            >
+                                + ADD
                         </Button>
+                            :
+                            <Button onClick={()=>router.push("/login")} size="small" color="primary" variant="contained" size="medium">
+                                Login to add
+                        </Button>
+                        }
                     </span> :
                     <Button size="small" color="primary">
                         <Link href={`/product/${_id}`}>
@@ -83,14 +135,15 @@ export default function MediaCard({ product, single }) {
                         </Link>
                     </Button>
                 }
-                <Dialog
-                    onConfirmHandler={onConfirmHandler}
-                    title="Are you sure want to delete this product?"
-                    body="If yo want to delete this product click Agree button. Else click Disagree"
-                >
-                    <Button variant="contained" color="secondary">Delete</Button>
-                </Dialog>
-
+                {user && user.role !== "user" &&
+                    <Dialog
+                        onConfirmHandler={onConfirmHandler}
+                        title="Are you sure want to delete this product?"
+                        body="If yo want to delete this product click Agree button. Else click Disagree"
+                    >
+                        <Button variant="contained" color="secondary">Delete</Button>
+                    </Dialog>
+                }
 
             </CardActions>
         </Card>

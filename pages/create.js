@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import { Button } from '@material-ui/core';
+import Toaster from 'components/ui/Tostify';
+import { parseCookies } from 'nookies';
 
 const useStyles = makeStyles((theme) => ({
 
@@ -15,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function SimplePaper() {
+function SimplePaper() {
     const classes = useStyles();
     const [name, setname] = useState('');
     const [price, setprice] = useState('');
@@ -25,18 +27,54 @@ export default function SimplePaper() {
     const onSubmit = async (event) => {
         event.preventDefault();
 
-        console.log(name, price);
-        const user = await fetch("/api/signup", {
+        const mediaUrl = await imageUpload();
+
+        const res = await fetch("/api/products", {
             method: "POST",
-            body: JSON.stringify({ name, price }),
+            body: JSON.stringify({
+                name,
+                price,
+                description,
+                mediaUrl
+            }),
             headers: {
                 "Content-Type": "application/json"
             }
         });
 
-        const data = await user.json();
-        console.log(data);
+        const res2 = await res.json();
+        console.log(res2);
+        if (res2.error) {
+            // Error  toster
+            Toaster({
+                message: res2.error,
+                type: 'error',
+            })
+        } else {
+            // success toster
+            Toaster({
+                message: res2.message,
+                type: 'success',
+            })
+        }
 
+    }
+
+
+    const imageUpload = async () => {
+        const data = new FormData();
+        data.append("file", media);
+        data.append("upload_preset", "mystore");
+        data.append("cloud_name", "duuvxfcio");
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/duuvxfcio/image/upload`, {
+            method: "POST",
+            body: data
+        });
+
+        const res2 = await res.json();
+        // console.log(res2);
+        return res2.url;
     }
 
     const onChange = (e) => {
@@ -68,7 +106,7 @@ export default function SimplePaper() {
 
         <Paper style={{ width: "100%", padding: "20px" }}>
             <form className={classes.form} noValidate autoComplete="off" onSubmit={onSubmit} >
-                <h2 style={{ textAlign: "center" }}>Signup Form</h2>
+                <h2 style={{ textAlign: "center" }}>Create new product</h2>
                 <TextField
                     fullWidth
                     placeholder="name"
@@ -102,12 +140,12 @@ export default function SimplePaper() {
                     type="file"
                     variant="outlined"
                 />
-                {media && 
-                <img
-                    style={{ width: "100px", height: "100px" }}
-                    src={URL.createObjectURL(media)}
-                />
-            }
+                {media &&
+                    <img
+                        style={{ width: "100px", height: "100px" }}
+                        src={URL.createObjectURL(media)}
+                    />
+                }
                 <br />
                 <br />
                 <TextField
@@ -130,3 +168,20 @@ export default function SimplePaper() {
 
 
 
+
+export async function getServerSideProps(ctx) {
+    const cookie = parseCookies(ctx);
+    const user = cookie.user ? JSON.parse(cookie.user) : "";
+    if (user.role !== "admin") {
+        const { res } = ctx;
+        res.writeHead(302, { location: "/" }),
+            res.end();
+    }
+ 
+    return {
+        props: {}
+    }
+}
+
+
+export default SimplePaper;
