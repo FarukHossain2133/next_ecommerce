@@ -1,5 +1,5 @@
 import initDB from 'helpers/initDB';
-import Product from 'models/Product';
+import Product from '../../models/Product';
 
 initDB();
 
