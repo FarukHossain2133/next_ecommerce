@@ -1,5 +1,8 @@
-import jwt from 'jsonwebtoken';
 import Cart from 'models/Cart';
+import initDB from 'helpers/initDB';
+import {Authenticated} from 'helpers/Authenticated';
+
+initDB()
 
 export default async (req, res) => {
 
@@ -7,9 +10,13 @@ export default async (req, res) => {
         case "GET":
             await fetchUserCart(req, res);
             break;
+        case "DELETE":
+            await removeProduct(req, res);
+            break;
         case "PUT":
             await addProduct(req, res);
             break;
+
 
 
     }
@@ -17,29 +24,11 @@ export default async (req, res) => {
 };
 
 
-const Authenticated = (component) => {
-    return (req, res) => {
-        const { authorization } = req.headers;
-        // console.log(authorization);
-        if (!authorization) return res.status(401).json({ error: "You must logged in" });
-
-        try {
-            const token = authorization.split(" ")[1];
-            // console.log(token);
-            const { userId } = jwt.verify(token, process.env.JWT_SECRET);
-            req.userId = userId;
-            return component(req, res)
-
-        } catch (error) {
-            return res.status(401).json({ error: "You must logged in" });
-        }
-    }
-}
 
 const fetchUserCart = Authenticated(async (req, res) => {
 
-    const cart = await Cart.findOne({ user: req.userId });
-    return res.status(200).json({ cart: cart.products });
+    const cart = await Cart.findOne({ user: req.userId }).populate("products.productId");
+    return res.status(200).json(cart.products);
 
 })
 
@@ -49,7 +38,7 @@ const addProduct = Authenticated(async (req, res) => {
     // console.log(productId);
 
     const userCart = await Cart.findOne({ user: req.userId });
-    if(!userCart)  return res.status(404).json({ error: "Cart is not found" });
+    if (!userCart) return res.status(404).json({ error: "Cart is not found" });
 
     const findProduct = userCart.products.some((prod) => prod.productId.toString() === productId);
 
@@ -95,3 +84,24 @@ const addProduct = Authenticated(async (req, res) => {
     return res.status(200).json({ message: "Cart is updated" });
 
 });
+
+
+
+
+const removeProduct = Authenticated(async (req, res) => {
+    const { productId } = req.body;
+    try {
+        const cart = await Cart.findOneAndUpdate(
+            { user: req.userId },
+            { $pull: { products: { productId: productId } } },
+            { new: true }
+        ).populate("products.productId");
+
+        res.status(200).json({message: "Product removed successfull", products: cart.products});
+    } catch (error) {
+        res.status(404).json({ error: "Product removed failed" });
+
+    }
+
+});
+
