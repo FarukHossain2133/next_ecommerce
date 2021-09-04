@@ -118,13 +118,13 @@ export default function MediaCard({ product, single }) {
                             onChange={(e)=>setQuantity(Number(e.target.value))}
                         />
                         {user ?
-                            <Button size="small" color="primary" variant="contained" size="medium"
+                            <Button  color="primary" variant="contained" size="medium"
                                 onClick={()=>addToCart()}
                             >
                                 + ADD
                         </Button>
                             :
-                            <Button onClick={()=>router.push("/login")} size="small" color="primary" variant="contained" size="medium">
+                            <Button onClick={()=>router.push("/login")}  color="primary" variant="contained" size="medium">
                                 Login to add
                         </Button>
                         }
@@ -135,7 +135,7 @@ export default function MediaCard({ product, single }) {
                         </Link>
                     </Button>
                 }
-                {(user && user.role !== "user") &&
+                {user && user.role !== "user" &&
                     <Dialog
                         onConfirmHandler={onConfirmHandler}
                         title="Are you sure want to delete this product?"
