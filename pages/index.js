@@ -13,7 +13,19 @@ const index = ({ products }) => {
 }
 
 
-export async function getStaticProps() {
+// export async function getStaticProps() {
+//   const response = await fetch( baseUrl+"/api/products");
+//   const data = await response.json();
+
+//   return {
+//     props: {
+//       products: data.products
+//     }
+//   }
+// }
+
+
+export async function getServerSideProps() {
   const response = await fetch( baseUrl+"/api/products");
   const data = await response.json();
 
@@ -23,5 +35,6 @@ export async function getStaticProps() {
     }
   }
 }
+
 
 export default index
