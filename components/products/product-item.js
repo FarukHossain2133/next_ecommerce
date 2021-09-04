@@ -135,7 +135,7 @@ export default function MediaCard({ product, single }) {
                         </Link>
                     </Button>
                 }
-                {user && user.role !== "user" &&
+                {(user && user.role !== "user") &&
                     <Dialog
                         onConfirmHandler={onConfirmHandler}
                         title="Are you sure want to delete this product?"

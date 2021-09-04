@@ -16,9 +16,6 @@ export default async (req, res) => {
         case "PUT":
             await addProduct(req, res);
             break;
-
-
-
     }
 
 };

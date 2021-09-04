@@ -5,15 +5,19 @@ import OrdersList from 'components/account/OrdersList';
 import UserRoles from 'components/account/userRole';
 import baseUrl from 'helpers/baseUrl';
 
+
 const Account = ({orders, error}) => {
     if(error) return <p style={{textAlign: 'center', color: "red"}}>{error}</p>
+    const cookies = parseCookies();
+    const user = cookies.user ? JSON.parse(cookies.user) : "";
+
     return (
         <div style={{margin:"0 auto"}}>
            <Profile/>
            <br/>
            <OrdersList orders={orders}/>
            <br/>
-           <UserRoles/>
+           {user.role === "root" && <UserRoles/>}
         </div>
     )
 }
