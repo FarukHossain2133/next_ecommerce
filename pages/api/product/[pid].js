@@ -1,8 +1,8 @@
 import Product from 'models/Product';
-// import initDB from 'helpers/initDB';
+import initDB from 'helpers/initDB';
 
 
-// initDB()
+initDB()
 
 export default async function (req, res) {
 
