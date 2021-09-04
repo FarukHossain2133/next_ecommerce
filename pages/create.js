@@ -141,7 +141,7 @@ function SimplePaper() {
                     variant="outlined"
                 />
                 {media &&
-                    <img
+                    <Image
                         style={{ width: "100px", height: "100px" }}
                         src={URL.createObjectURL(media)}
                     />

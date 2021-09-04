@@ -11,7 +11,7 @@ import List from '@material-ui/core/List';
 import StripeCheckout from 'react-stripe-checkout';
 
 
-const cart = ({ error, products }) => {
+const Cart = ({ error, products }) => {
     const { token } = parseCookies();
     const [initProduct, setinitProduct] = useState(products)
     const router = useRouter();
@@ -20,7 +20,7 @@ const cart = ({ error, products }) => {
     if (!token) {
         return (
             <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                <p style={{ textAlign: 'center' }}>Please login to view your cart</p>
+                <p style={{ textAlign: 'center' }}>Please login to view your C</p>
                 <Button color="primary" variant="outlined">
                     <Link href="/login">
                         Login
@@ -150,4 +150,4 @@ export async function getServerSideProps(ctx) {
 
 }
 
-export default cart;
+export default Cart;
