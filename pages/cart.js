@@ -43,19 +43,34 @@ const cart = ({ error, products }) => {
 
     let price = 0;
 
-    const handleCheckout = async(paymentInfo) => {
+    const handleCheckout = async (paymentInfo) => {
         console.log(paymentInfo);
-      const res = await fetch('/api/payment', {
+        const res = await fetch('/api/payment', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + token
             },
-            body: JSON.stringify({paymentInfo})
+            body: JSON.stringify({ paymentInfo })
         });
 
         const res2 = await res.json();
-        console.log(res2);
+
+        if (res2.error) {
+            // Error  toster
+            Toaster({
+                message: res2.error,
+                type: 'error',
+            })
+        } else {
+            // success toster
+            Toaster({
+                message: res2.message,
+                type: 'success',
+            })
+            router.push("/account");
+
+        }
 
     }
 
@@ -81,18 +96,21 @@ const cart = ({ error, products }) => {
 
     return (
         <>
-            <List>
-                {
-                  initProduct.length > 0 &&  initProduct.map((product, index) => {
-                        price = price + product.quantity * product.productId.price;
-                        // console.log(product.quantity, product.productId.price);
-                        return <CartItem
-                            product={product}
-                            key={index}
-                            setinitProduct={setinitProduct}
-                        />
-                    })}
-            </List>
+            {initProduct.length > 0 ?
+                <List>
+                    {
+                        initProduct.length > 0 && initProduct.map((product, index) => {
+                            price = price + product.quantity * product.productId.price;
+                            // console.log(product.quantity, product.productId.price);
+                            return <CartItem
+                                product={product}
+                                key={index}
+                                setinitProduct={setinitProduct}
+                            />
+                        })}
+                </List>
+                : <p style={{ textAlign: "center" }}>You are not purchased any product yet </p>
+            }
             {price > 0 && totalPrice()}
         </>
 

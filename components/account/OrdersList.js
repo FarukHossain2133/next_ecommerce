@@ -32,7 +32,7 @@ export default function BasicTable({orders}) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map((row) => (
+          {orders && orders.map((row) => (
             <TableRow key={row._id}>
               <TableCell component="th" scope="row">
                 {row._id}

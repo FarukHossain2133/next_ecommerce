@@ -7,7 +7,9 @@ async function initDB() {
         return;
     }
 
-    await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect(process.env.NODE_ENV === "production" ?
+        process.env.MONGO_URI_PROD :
+        process.env.MONGO_URI_DEV, {
         useNewUrlParser: true,
     });
 
